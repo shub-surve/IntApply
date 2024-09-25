@@ -1,4 +1,4 @@
-![intApply.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/78581573-0c0e-4d71-a082-7e1388af1f95/02530e9f-db13-44f4-bc56-4a71516afed0/intApply.png)
+![image.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/78581573-0c0e-4d71-a082-7e1388af1f95/743195be-4346-4f54-8277-51c5684c7aa6/image.png)
 
 ```sql
 -- Table to store user login credentials
@@ -12,8 +12,8 @@ CREATE TABLE USERLOG (
 -- Table to store user profiles
 CREATE TABLE UserProfiles (
     UserID INT PRIMARY KEY AUTO_INCREMENT,
-    FirstName VARCHAR(100) NOT NULL,
-    LastName VARCHAR(100) NOT NULL,
+    FirstName VARCHAR (100) NOT NULL,
+    LastName VARCHAR (100) NOT NULL,
     Email VARCHAR(255) NOT NULL UNIQUE,
     Location VARCHAR(255)
 );
@@ -23,9 +23,9 @@ CREATE TABLE Resumes (
     ResumeID INT PRIMARY KEY AUTO_INCREMENT,
     UserID INT,
     Summary TEXT,
-    WorkExperience TEXT,
-    Skills TEXT,    -- Comma-separated list of skills
-    Certifications TEXT,    -- Certifications the user has obtained
+   --drop WorkExperience TEXT,
+    Skills TEXT,   -- Comma-separated list of skills
+    Certifications TEXT,   -- Certifications the user has obtained
     Projects TEXT,   -- List of projects the user has worked on
     FOREIGN KEY (UserID) REFERENCES UserProfiles(UserID)
 );
@@ -48,7 +48,16 @@ CREATE TABLE Companies (
     Industry VARCHAR(255),
     Website VARCHAR(255),
     Location VARCHAR(255),
+    Email VARCHAR(255) NOT NULL UNIQUE,
     Description TEXT
+);
+
+CREATE TABLE CompanyLog (
+    CompanyLogID INT PRIMARY KEY AUTO_INCREMENT,
+    CompanyID INT,
+    Email VARCHAR(255) NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    FOREIGN KEY (CompanyID) REFERENCES Companies(CompanyID)
 );
 
 -- Table to store internships
@@ -69,7 +78,7 @@ CREATE TABLE Applications (
     UserID INT,
     InternshipID INT,
     Status ENUM('Pending', 'Accepted', 'Rejected') DEFAULT 'Pending',
-    ApplicationDate DATE DEFAULT Current_date(),
+    ApplicationDate DATE,
     FOREIGN KEY (UserID) REFERENCES UserProfiles(UserID),
     FOREIGN KEY (InternshipID) REFERENCES Internships(InternshipID)
 );
@@ -79,7 +88,7 @@ CREATE TABLE Notifications (
     NotificationID INT PRIMARY KEY AUTO_INCREMENT,
     UserID INT,
     Message VARCHAR(255),
-    SentDate DATE defa,
+    SentDate DATE,
     FOREIGN KEY (UserID) REFERENCES UserProfiles(UserID)
 );
 
@@ -103,6 +112,7 @@ The flow of the database is designed to manage and facilitate an internship appl
 ### 2. **Company and Internship Management**
 
 - **Companies Table**: Stores information about companies, including their `Name`, `Industry`, `Website`, and `Location`. Each company has a unique `CompanyID`.
+- 
 - **Internships Table**: Companies can offer internships, and these internships are stored in the `Internships` table with details like `Title`, `Description`, `Location`, `Duration`, `ApplicationDeadline`, and the associated `CompanyID`.
     
     **Flow:**
@@ -132,24 +142,27 @@ The flow of the database is designed to manage and facilitate an internship appl
 ### 5 Procedures for the Database
 
 1. **Procedure to Add a New User Profile (addUser())**: Adds a new user to the `UserProfiles` table and ensures that the email is unique.
-2. **Procedure to set password (setPassword):** Sets password by taking in user id and password hashes the password and stores it in database.
-3. **Procedure to Update Internship Details (updateInternshipDetails)**: Updates details for a specific internship in the `Internships` table, such as title, description, location, duration, or application deadline.
-4. **Procedure to add an internship (addInternship):** Will have company id and all the inserting values. 
-5. **Procedure to create or maintain resume (InsertResume):** Through this user can add his resume in a particular format.
-6. **Procedure to apply for internship (ApplyForInt):**  Checks whether the applications exist or not if not then insert new application.
-7. **Procedure to update status on applications (updateApplicationStatus):** Will take inputs of application id and status and will update the status of application
-8. **Procedure to get application id and status of application (getApplicationIDandStatusForUser):** Will take user id and return table that has application number and the status of application.
+2. **Procedure to add education (AddEducation):** 
+3. **Procedure to set password (setPassword):** Sets password by taking in user id and password hashes the password and stores it in database.
+4. **Procedure to Update Internship Details (updateInternshipDetails)**: Updates details for a specific internship in the `Internships` table, such as title, description, location, duration, or application deadline.
+5. **Procedure to add an internship (addInternship):** Will have company id and all the inserting values. 
+6. **Procedure to create or maintain resume (InsertResume):** Through this user can add his resume in a particular format.
+7. **Procedure to apply for internship (ApplyForInt):**  Checks whether the applications exist or not if not then insert new application.
+8. **Procedure to update status on applications (updateApplicationStatus):** Will take inputs of application id and status and will update the status of application
+9. **Procedure to get application id and status of application (getApplicationIDandStatusForUser):** Will take user id and return table that has application number and the status of application.
+10. **Procedure to get all internships from company (getCompanyInternships):**
 
 ### 5 Triggers for the Database
 
-1. **Trigger To Insert into userLog after inserting in userProfile:** Userid , email will be added to userlog.
-2. **Trigger After Inserting a New Application (NotifyForApplication)**: Automatically sends a notification to the user confirming the receipt of their internship application.
-3. **Triggers to notify the user about the status update on application (NotifyAfterStatusUpdate):** After the procedure updateApplicationStatus will insert new notification about status update.
-4. **Trigger After Deleting an Internship from `Internships`  (deleteapplicationOnDelInt)**: Automatically deletes any applications associated with the deleted internship to maintain data consistency.
+1. **Trigger To Insert into userLog after inserting in userProfile  (addUserLog):** Userid , email will be added to userlog.
+2. **Trigger to insert company log (insertCompanyLog)**
+3. **Trigger After Inserting a New Application (NotifyForApplication)**: Automatically sends a notification to the user confirming the receipt of their internship application.
+4. **Triggers to notify the user about the status update on application (NotifyAfterStatusUpdate):** After the procedure updateApplicationStatus will insert new notification about status update.
+5. **Trigger After Deleting an Internship from `Internships`  (deleteapplicationOnDelInt)**: Automatically deletes any applications associated with the deleted internship to maintain data consistency.
+6. **after_internship_delete :** Deletes applications related to internships when an internship is deleted.
 
-1. **Procedure to Retrieve Company Internships**: Fetches all internships offered by a specific company, including details such as internship title, location, duration, and application deadline.
+## FUNCTIONS
 
-Function to get no of employees enrolled and their education
-
-1. **Trigger Before Deleting a Company from `Companies`**: Checks if there are any active internships or applications associated with the company and prevents deletion if there are.
-2. **Trigger After Deleting an Internship from `Internships`**: Automatically deletes any applications associated with the deleted internship to maintain data consistency.
+- **getHighestEducatedUser :**  Function returns userid with highest education level for the given internship.
+- **No_Of_applications:** Functions returns number of total application.
+- 
